@@ -23,10 +23,19 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Trigger start event to all connected clients
     await pusher.trigger("strobe_channel", "START", {});
+    
+    // Update state for late comers
+    await fetch('https://light-audience-server.vercel.app/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isRunning: true, isPaused: false })
+    });
+    
     res.status(200).json({ status: "ok", message: "Performance started" });
   } catch (error) {
-    console.error("Pusher error:", error);
+    console.error("Error:", error);
     res.status(500).json({ status: "error", message: error.message });
   }
 };
